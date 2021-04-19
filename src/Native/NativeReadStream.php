@@ -42,26 +42,6 @@ class NativeReadStream extends NativeStream {
 		return parent::wrapClass($state, $smbStream, $mode, $url, NativeReadStream::class);
 	}
 
-	public function stream_read($count) {
-		// php reads 8192 bytes at once
-		// however due to network latency etc, it's faster to read in larger chunks
-		// and buffer the result
-		if (!parent::stream_eof() && $this->readBuffer->remaining() < $count) {
-			$chunk = parent::stream_read(self::CHUNK_SIZE);
-			if ($chunk === false) {
-				return false;
-			}
-			$this->readBuffer->push($chunk);
-		}
-
-		$result = $this->readBuffer->read($count);
-
-		$read = strlen($result);
-		$this->pos += $read;
-
-		return $result;
-	}
-
 	public function stream_seek($offset, $whence = SEEK_SET) {
 		$result = parent::stream_seek($offset, $whence);
 		if ($result) {
